@@ -1,0 +1,21 @@
+autopep8
+matplotlib
+numpy
+Pillow
+pytorch_lightning
+scikit_learn
+scipy
+seaborn
+tqdm
+# umap
+umap_learn
+pandas
+mlflow
+omegaconf
+hydra-core
+vit-pytorch
+ipykernel
+openpyxl
+imagesize
+timm
+japanize-matplotlib

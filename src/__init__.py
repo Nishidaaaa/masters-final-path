@@ -1,0 +1,2 @@
+
+PHASES = ["train", "val", "test"]

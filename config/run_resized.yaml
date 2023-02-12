@@ -1,0 +1,41 @@
+run_main_id:
+run_main:
+  trainer:
+    max_epochs: 100
+    accelerator: gpu
+    devices:
+      - 0
+  model:
+    net:
+      # model_name: resnet34
+      model_name: vit_small_patch16_224_dino
+      pretrained: True
+      num_classes: 2
+    optimizer:
+      lr: 0.001
+  data:
+    filemanager:
+      root: ./dataset/jpg_raw/nikon/
+      index_xlsx: ./dataset/jpg_raw/index.xlsx
+      exts:
+        - jpg
+        - jpeg
+    file_spoiler:
+      types: 
+        # - fna_cell
+        - cell
+      classes:
+        - ca
+        - ng
+        - nr1
+        - nr2
+        - fa
+        - adh
+        - idp
+        - ph
+      magnifications:
+        - 040x
+    image_size: 224
+    batch_size: 16
+    num_workers: 4
+    split_random_state: 0

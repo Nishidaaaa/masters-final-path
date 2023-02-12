@@ -1,0 +1,12 @@
+.ssh/*
+!.ssh/ADDKEYHERE
+dataset/*
+!dataset/test_files.csv
+!dataset/train_files.csv
+mlruns
+outputs
+*.pyc
+pretrained_embeddings
+tmp/*
+nohup.out
+thesis/*
