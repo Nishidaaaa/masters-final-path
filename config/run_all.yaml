@@ -1,0 +1,8 @@
+defaults:
+  - extract_features: default
+  - reduce_dimension: default
+  - clusterize_and_classify: default
+
+extract_features_id:
+reduce_dimension_id:
+clusterize_and_classify_id:

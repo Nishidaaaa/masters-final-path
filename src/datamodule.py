@@ -4,6 +4,7 @@ import torch
 import src
 from src.utils.data import NikonFileInfoManager, PatchDataset, PatchFrom2ImagesDataset, RandomSamplePatchDataset, ResizedDataset
 import mlflow
+import os
 from torch.utils.data import DataLoader, Subset
 
 flip_augmentations = transforms.Compose(
@@ -87,6 +88,7 @@ class PatchDataModule(pl.LightningDataModule):
 
         for phase in src.PHASES:
             path = f"./tmp/{phase}.csv"
+            os.makedirs("./tmp", exist_ok=True)
             self.files[phase].to_csv(path)
             mlflow.log_artifact(local_path=path)
 
@@ -106,6 +108,30 @@ class PatchDataModule(pl.LightningDataModule):
 
     def test_dataloader(self, shuffle=False, original=False) -> DataLoader:
         return self.dataloader("test", shuffle)
+
+    @property
+    def cumulative_sums(self):
+        return {phase: self.patch_datasets[phase].cumulative_sum for phase in src.PHASES}
+
+    @property
+    def patch_labels(self):
+        return {phase: self.patch_datasets[phase].labels for phase in src.PHASES}
+
+    @property
+    def original_labels(self):
+        return {phase: self.patch_datasets[phase].original_labels for phase in src.PHASES}
+
+    @property
+    def patch_classes(self):
+        return {phase: self.patch_datasets[phase].classes for phase in src.PHASES}
+
+    @property
+    def original_classes(self):
+        return {phase: self.patch_datasets[phase].original_classes for phase in src.PHASES}
+
+    @property
+    def original_fullpaths(self):
+        return {phase: self.patch_datasets[phase].original_fullpaths for phase in src.PHASES}
 
 
 class PatchFrom2ImagesDataModule(PatchDataModule):

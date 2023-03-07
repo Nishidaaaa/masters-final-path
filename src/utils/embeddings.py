@@ -10,7 +10,7 @@ def log_embeddings(model, trainer, datamodule):
     val = datamodule.val_dataloader(shuffle=False, original=True)
     test = datamodule.test_dataloader(shuffle=False, original=True)
 
-    dataloaders = {"val": val, "test": test, "train": train, }
+    dataloaders = {"val": val, "test": test, "train": train}
     codes = {}
     labels = {}
     for phase, loader in dataloaders.items():

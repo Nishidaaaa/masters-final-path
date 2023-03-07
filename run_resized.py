@@ -9,10 +9,10 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger
 
-from src.classifier import KmeansGaussian
+from src.old_classifier import KmeansGaussian
 from src.datamodule import ResizeDataModule
 from src.dino import LDino, LViT
-from src.preprocess import preprocess
+from src.preprocess import reduce_dimension
 from src.utils.attention import save_attentions
 from src.utils.embeddings import log_embeddings
 from src.utils.log import log_config, recover_config

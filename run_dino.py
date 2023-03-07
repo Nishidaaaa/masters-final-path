@@ -9,14 +9,14 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger
 
-from src.classifier import get_classifier
+from src.old_classifier import get_classifier
 from src.datamodule import PatchDataModule, PatchFrom2ImagesDataModule, PatchRandomSampleDataModule
 from src.dino import LDino
-from src.preprocess import preprocess
+from src.preprocess import reduce_dimension
 from src.utils.attention import save_attentions
 from src.utils.embeddings import log_embeddings
 from src.utils.log import IDLogger, log_config, recover_config
-from src.utils.analyze import analyze
+from src.utils.analyze import log_graphs
 experiment_name = "run_dino"
 
 
@@ -69,7 +69,7 @@ def run_all(config: omegaconf.DictConfig) -> None:
             current_config = recover_config(config.preprocess)
             log_config(current_config)
 
-            preprocessed = preprocess(current_config, codes)
+            preprocessed = reduce_dimension(current_config, codes)
 
             with mlflow.start_run(run_id=config.classify_id, nested=True):
                 id_logger.log("classify_id")
@@ -80,8 +80,8 @@ def run_all(config: omegaconf.DictConfig) -> None:
                 classifier.fit(datasets, preprocessed)
                 preds = classifier.preds
                 hists = classifier.hists
-                analyze(data_module=data_module, preprocessed=preprocessed, preds=preds, clustered=classifier.clustered, hists=hists,
-                        n_clusters=config.classify.classifier.kmeans_args.n_clusters, image_size=config.common.image_size, probas=classifier.probas)
+                log_graphs(data_module=data_module, preprocessed=preprocessed, preds=preds, clustered=classifier.clustered, hists=hists,
+                           n_clusters=config.classify.classifier.kmeans_args.n_clusters, image_size=config.common.image_size, probas=classifier.probas)
 
                 # try:
                 #     save_attentions(model, current_config.classifier.kmeans_args.n_clusters,

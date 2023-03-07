@@ -1,3 +1,4 @@
+import os
 import src
 import pandas as pd
 import seaborn as sns
@@ -20,29 +21,28 @@ def check_none(elements):
     return True
 
 
-def get_thumbnail(file, index):
-    dataset = ThumbnailDataset(dataframe=file, p=10)
-    img, y = dataset[index]
+def get_thumbnail(fullpaths, index):
+    dataset = ThumbnailDataset(fullpaths=fullpaths, p=10)
+    img = dataset[index]
     return img
 
 
-def log_heatmap(data_module, clustered, preds, n_clusters, image_size):
+def log_heatmap(clustered_features, predictions, n_clusters, image_size, original_fullpaths, cumulative_sums, original_classes, original_labels):
     for phase in src.PHASES:
-        file = data_module.files[phase]
-        dataset = data_module.patch_datasets[phase]
-        pred = preds[phase]
-        for index, row in file.iterrows():
-            w, h = imagesize.get(row["fullpath"])
+        # for index, row in file.iterrows():
+        cumulative_sum = cumulative_sums[phase]
+        for index, (fullpath, _class, label, pred) in enumerate(zip(original_fullpaths[phase], original_classes[phase], original_labels[phase], predictions[phase])):
+            w, h = imagesize.get(fullpath)
             w = w//image_size
             h = h//image_size
-            right = dataset.cumulative_sum[index]
-            left = ([0]+dataset.cumulative_sum)[index]
-            clusters = np.array(clustered[phase][left:right])
+            right = cumulative_sum[index]
+            left = ([0]+cumulative_sum)[index]
+            clusters = np.array(clustered_features[phase][left:right])
             grid = np.reshape(clusters, [h, w])
             fig = plt.figure()
 
             ax = fig.add_subplot(2, 1, 1)
-            img = get_thumbnail(file, index)
+            img = get_thumbnail(original_fullpaths[phase], index)
             ax.imshow(np.asarray(img))
             ax.axis("off")
 
@@ -50,24 +50,18 @@ def log_heatmap(data_module, clustered, preds, n_clusters, image_size):
             sns.heatmap(grid, vmax=n_clusters, vmin=0, square=True, ax=ax, cmap=sns.diverging_palette(
                 center="dark", h_neg=240, h_pos=0, n=16, l=60, s=75))
             ax.axis("off")
+            name = os.path.splitext(os.path.basename(fullpath))[0]
 
-            mlflow.log_figure(fig, f"heatmap/{phase}/{row['class']}_{row['label']}_{pred[index]}_{index}.png")
+            mlflow.log_figure(fig, f"heatmap/{phase}/{_class}_{label}_{pred}_{name}.png")
             plt.close()
 
 
-def log_histgram(data_module, clustered, preds, n_clusters):
+def log_histgram(original_fullpaths, original_classes, original_labels, predictions, n_clusters, histgrams):
     for phase in src.PHASES:
-        file = data_module.files[phase]
-        dataset = data_module.patch_datasets[phase]
-        pred = preds[phase]
-        for index, row in file.iterrows():
-            right = dataset.cumulative_sum[index]
-            left = ([0]+dataset.cumulative_sum)[index]
-            clusters = np.array(clustered[phase][left:right])
-            histgram = [0]*n_clusters
-            for c in clusters:
-                histgram[c] += 1
-            histgram = preprocessing.normalize([histgram])[0]
+        normalized_histgram = preprocessing.normalize(histgrams[phase])
+
+        file_infos = zip(original_fullpaths[phase], normalized_histgram, predictions[phase], original_classes[phase], original_labels[phase])
+        for fullpath, histgram, pred, _class, label in file_infos:
             fig = plt.figure()
             plt.bar(x=list(range(n_clusters)), height=histgram, width=1.0)
             plt.ylim((0.0, 1.0))
@@ -75,7 +69,8 @@ def log_histgram(data_module, clustered, preds, n_clusters):
 
             plt.xlabel("クラスタ番号")
             plt.ylabel("頻度")
-            mlflow.log_figure(fig, f"histgram/{phase}/{row['class']}_{row['label']}_{pred[index]}_{index}.pdf")
+            name = os.path.splitext(os.path.basename(fullpath))[0]
+            mlflow.log_figure(fig, f"histgram/{phase}/{_class}_{label}_{pred}_{name}.pdf")
             plt.close()
 
 
@@ -96,15 +91,15 @@ def log_overview(data_module, preds, probas):
         print(class_group["correct"].agg(lambda x: f"{sum(x)}/{len(x)}={sum(x)/len(x)}"))
 
 
-def log_cluster_scatter(data_module, preprocessed, clustered):
+def log_cluster_scatter(patch_labels, patch_classes, reduced_features, clusterd_features):
     for phase in src.PHASES:
-        file = data_module.files[phase]
 
-        x = np.array(preprocessed[phase][:, 0])
-        y = np.array(preprocessed[phase][:, 1])
-        labels = np.array(data_module.patch_datasets[phase].labels)
-        _class = np.array(data_module.patch_datasets[phase].classes)
-        claster = np.array(clustered[phase])
+        x = np.array(reduced_features[phase][:, 0])
+        y = np.array(reduced_features[phase][:, 1])
+        labels = np.array(patch_labels[phase])
+        _class = np.array(patch_classes[phase])
+        cluster = np.array(clusterd_features[phase])
+
         idx = np.array(range(len(x)))
         np.random.shuffle(idx)
         fig = plt.figure(figsize=(10, 5), tight_layout=True)
@@ -123,28 +118,27 @@ def log_cluster_scatter(data_module, preprocessed, clustered):
         # plt.legend()
         # ax = fig.add_subplot(3, 1, 3)
         fig = plt.figure(figsize=(10, 5), tight_layout=True)
-        plt.scatter(x[idx], y[idx], c=claster[idx], cmap='Spectral', s=2)
-        plt.colorbar(boundaries=np.arange(np.max(claster)+2)-0.5).set_ticks(np.arange(np.max(claster)+1))
+        plt.scatter(x[idx], y[idx], c=cluster[idx], cmap='Spectral', s=2)
+        plt.colorbar(boundaries=np.arange(np.max(cluster)+2)-0.5).set_ticks(np.arange(np.max(cluster)+1))
         plt.xlabel("umap_1")
         plt.ylabel("umap_2")
         mlflow.log_figure(fig, f"scatter/claster_{phase}.png")
         plt.close()
 
 
-def log_final_scatter(data_module, hists):
+def log_final_scatter(original_labels, original_classes, histgrams):
     from scipy.spatial.distance import jensenshannon, euclidean
     # reducer = umap.UMAP(n_components=2, random_state=0, metric=jensenshannon)
 
     for metric in [jensenshannon, euclidean]:
         umap = UMAP(n_components=2, random_state=0, metric=metric)
-        umap.fit(hists["train"])
-        coods = {phase: umap.transform(hists[phase]) for phase in src.PHASES}
+        umap.fit(histgrams["train"])
+        coods = {phase: umap.transform(histgrams[phase]) for phase in src.PHASES}
         for phase in src.PHASES:
-            file = data_module.files[phase]
             x = np.array(coods[phase][:, 0])
             y = np.array(coods[phase][:, 1])
-            labels = np.array(file["label"])
-            _class = np.array(file["class"])
+            labels = np.array(original_labels[phase])
+            _class = np.array(original_classes[phase])
 
             fig = plt.figure(figsize=(16/2.54, 10/2.54))
             for label in [True, False]:
@@ -169,11 +163,10 @@ def log_final_scatter(data_module, hists):
 
         fig = plt.figure(figsize=(16/2.54, 10/2.54))
         for phase in src.PHASES:
-            file = data_module.files[phase]
             x = np.array(coods[phase][:, 0])
             y = np.array(coods[phase][:, 1])
-            labels = np.array(file["label"])
-            _class = np.array(file["class"])
+            labels = np.array(original_labels[phase])
+            _class = np.array(original_classes[phase])
 
             for label in [True, False]:
                 index = (labels == label)
@@ -185,11 +178,10 @@ def log_final_scatter(data_module, hists):
 
         fig = plt.figure(figsize=(16/2.54, 10/2.54))
         for phase in src.PHASES:
-            file = data_module.files[phase]
             x = np.array(coods[phase][:, 0])
             y = np.array(coods[phase][:, 1])
-            labels = np.array(file["label"])
-            _class = np.array(file["class"])
+            labels = np.array(original_labels[phase])
+            _class = np.array(original_classes[phase])
             for current_class in np.unique(_class):
                 for label in [True, False]:
                     index = (_class == current_class) & (labels == label)
@@ -198,10 +190,10 @@ def log_final_scatter(data_module, hists):
         plt.close()
 
 
-def log_cluster_bar(data_module, clustered, n_clusters):
+def log_cluster_bar(patch_labels, clustered_features, n_clusters):
     for phase in src.PHASES:
-        cluster = np.array(clustered[phase])
-        labels = np.array(data_module.patch_datasets[phase].labels)
+        cluster = np.array(clustered_features[phase])
+        labels = np.array(patch_labels[phase])
 
         counts = {}
         bar_labels = []
@@ -259,12 +251,11 @@ def log_cluster_bar(data_module, clustered, n_clusters):
         plt.close('all')
 
 
-def log_globalheat(data_module, hists):
+def log_global_heat(original_labels, histgrams):
     for phase in src.PHASES:
-        hist = hists[phase]
+        hist = histgrams[phase]
         hist = np.array(preprocessing.normalize(hist))
-        file = data_module.files[phase]
-        label = np.array(file["label"])
+        label = np.array(original_labels[phase])
 
         fig, axes = plt.subplots(2, 1, figsize=(16/2.54, 10/2.54))
         plt.subplots_adjust(hspace=0.6)
@@ -287,18 +278,36 @@ def log_globalheat(data_module, hists):
         mlflow.log_figure(fig, f"global_heat/{phase}.pdf")
         plt.close('all')
 
-    
+
+# def analyze(data_module=None, preprocessed=None,  preds=None, hists=None, probas=None, clustered=None, n_clusters=None, image_size=None):
+#     plt.rcParams["font.size"] = 10
+#     plt.rcParams["axes.labelpad"] = 2
+#     log_globalheat(data_module, hists)
+#     log_cluster_scatter(data_module, preprocessed, clustered)
+#     log_final_scatter(data_module, hists)
+#     log_cluster_bar(data_module, clustered, n_clusters)
+
+#     log_heatmap(data_module, clustered, preds, n_clusters, image_size)
+#     log_histgram(data_module, clustered, preds, n_clusters)
+#     log_overview(data_module, preds, probas)
 
 
-
-def analyze(data_module=None, preprocessed=None,  preds=None, hists=None, probas=None, clustered=None, n_clusters=None, image_size=None):
+def log_graphs(histgrams, original_labels, patch_labels, patch_classes, clustered_features, reduced_features, original_classes, n_clusters, predictions, original_fullpaths, cumulative_sums, image_size):
     plt.rcParams["font.size"] = 10
     plt.rcParams["axes.labelpad"] = 2
-    log_globalheat(data_module, hists)
-    log_cluster_scatter(data_module, preprocessed, clustered)
-    log_final_scatter(data_module, hists)
-    log_cluster_bar(data_module, clustered, n_clusters)
 
-    log_heatmap(data_module, clustered, preds, n_clusters, image_size)
-    log_histgram(data_module, clustered, preds, n_clusters)
-    log_overview(data_module, preds, probas)
+    log_global_heat(histgrams=histgrams, original_labels=original_labels)
+
+    log_cluster_scatter(patch_labels=patch_labels, patch_classes=patch_classes,
+                        clusterd_features=clustered_features, reduced_features=reduced_features)
+
+    log_final_scatter(original_labels=original_labels, original_classes=original_classes, histgrams=histgrams)
+
+    log_cluster_bar(clustered_features=clustered_features, n_clusters=n_clusters, patch_labels=patch_labels)
+
+    log_histgram(histgrams=histgrams, n_clusters=n_clusters, original_classes=original_classes,
+                 original_fullpaths=original_fullpaths, original_labels=original_labels, predictions=predictions)
+
+    log_heatmap(clustered_features=clustered_features, predictions=predictions, n_clusters=n_clusters, image_size=image_size,
+                original_fullpaths=original_fullpaths, cumulative_sums=cumulative_sums, original_classes=original_classes, original_labels=original_labels)
+    # log_overview

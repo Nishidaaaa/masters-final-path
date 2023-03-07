@@ -102,6 +102,10 @@ class PatchDataset(Dataset):
         return self._labels
 
     @property
+    def original_labels(self):
+        return self.original_dataset.labels
+
+    @property
     def classes(self):
         if len(self._classes) != self.__len__():
             for i in range(self.__len__()):
@@ -109,6 +113,14 @@ class PatchDataset(Dataset):
                 _class = self.dataframe["class"][original_image_index]
                 self._classes.append(_class)
         return self._classes
+
+    @property
+    def original_classes(self):
+        return self.original_dataset.classes
+
+    @property
+    def original_fullpaths(self):
+        return self.original_dataset.fullpaths
 
 
 class RandomSamplePatchDataset(Dataset):
@@ -210,6 +222,14 @@ class OriginalImageDataset(Dataset):
     def labels(self):
         return self.dataframe["label"].values.astype("int")
 
+    @property
+    def classes(self):
+        return self.dataframe["class"].values
+
+    @property
+    def fullpaths(self):
+        return self.dataframe["fullpath"].values
+
     def __len__(self):
         return len(self.dataframe)
 
@@ -244,12 +264,13 @@ class ResizedDataset(Dataset):
 
 
 class ThumbnailDataset(Dataset):
-    def __init__(self, dataframe, p=10):
-        self.original_dataset = OriginalImageDataset(dataframe, None)
+    def __init__(self, fullpaths, p=10):
+        self.fullpaths = fullpaths
         self.p = p
 
     def get_cache_path(self, index):
-        basename = self.original_dataset.dataframe["basename"][index]
+        fullpath = self.fullpaths[index]
+        basename = os.path.basename(fullpath)
         return f"./dataset/cache/thumbnail/{self.p}/{basename}.png"
 
     def __getitem__(self, index):
@@ -258,17 +279,16 @@ class ThumbnailDataset(Dataset):
             image = Image.open(cache_path)
 
         except:
-            image, _ = self.original_dataset[index]
+            image = Image.open(self.fullpaths[index])
             size = image.size
             image = image.resize((size[0]//self.p, size[1]//self.p))
             os.makedirs(os.path.dirname(cache_path), exist_ok=True)
             image.save(cache_path)
-        label = self.original_dataset.dataframe["label"][index]
 
-        return image, int(label)
+        return image
 
     def __len__(self):
-        return len(self.original_dataset)
+        return len(self.fullpaths)
 
 
 class NikonFileInfoManager:

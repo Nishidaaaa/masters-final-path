@@ -1,0 +1,9 @@
+mode: umap
+reducer:
+  pca_args:
+    n_components: 4
+    random_state: 0
+  umap_args:
+    n_components: 2
+    random_state: 0
+  should_normalize: False

@@ -1,26 +1,29 @@
-common: &common
-  image_size: 224
+mode: randomsample
 
-run_dino_id:
-run_dino:
-  <<: *common
-  max_epochs: 100
+trainer:
+  max_epochs: 1
   accelerator: gpu
-  gpus: 
+  devices: 
     - 0
-  batch_size: 64
-  num_workers: 4
+    
+model:
+  image_size: &imagesize 224
+
   lr: 0.001
   beta1: 0.9
   beta2: 0.999
 
   net:
-    model_name: vit_small_patch16_224_dino
+    model_name: resnet34
+    # model_name: vit_small_patch16_224_dino
+
     pretrained: True
     num_classes: -1
+    
 
   dino:
-    hidden_layer: norm
+    # hidden_layer: norm
+    hidden_layer: fc
     projection_hidden_size: 128      # projector network hidden dimension
     student_temp: 0.9                # student temperature
     num_classes_K: 4096             # output logits dimensions (referenced as K in paper)
@@ -31,6 +34,11 @@ run_dino:
     center_moving_average_decay: 0.9 # moving average of teacher centers - paper showed anywhere from 0.9 to 0.999 was ok
     projection_layers: 3             # number of layers in projection network
 
+data_module:
+  image_size: *imagesize
+  batch_size: 128
+  num_workers: 4
+  split_random_state: 0
   filemanager:
     root: ./dataset/jpg_raw/nikon/
     index_xlsx: ./dataset/jpg_raw/index.xlsx
@@ -40,35 +48,16 @@ run_dino:
 
   file_spoiler:
     types: 
+      # - fna_cell
       - cell
     classes:
       - ca
       - ng
       - nr1
       - nr2
+      - fa
+      - adh
+      - idp
+      - ph
     magnifications:
       - 040x
-
-preprocess_id:
-preprocess:
-  mode: pca_umap
-  reducer:
-    pca_args:
-      n_components: 4
-      random_state: 0
-    umap_args:
-      n_components: 2
-      random_state: 0
-    should_normalize: True
-
-classify_id:
-classify:
-  # n_clusters: 16
-  kmeans_args:
-    n_clusters: 16
-    random_state: 0
-
-
-
-
-

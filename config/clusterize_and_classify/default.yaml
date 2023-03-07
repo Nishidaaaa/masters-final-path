@@ -1,0 +1,10 @@
+
+# mode: kmeans_rf
+# classifier:
+kmeans_args:
+  n_clusters: 16
+  random_state: 0
+# svm:
+#   random_state: 0
+# knn:
+#   n_neighbors: 5
