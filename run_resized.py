@@ -10,8 +10,8 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger
 
 from src.old_classifier import KmeansGaussian
-from src.datamodule import ResizeDataModule
-from src.dino import LDino, LViT
+from src.lightning.datamodule import ResizeDataModule
+from src.lightning.dino import LDino, LViT
 from src.preprocess import reduce_dimension
 from src.utils.attention import save_attentions
 from src.utils.embeddings import log_embeddings

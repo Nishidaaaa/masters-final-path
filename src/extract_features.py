@@ -11,9 +11,9 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger
 
 from src import Phase
-from src.datamodule import (PatchDataModule, PatchFrom2ImagesDataModule,
-                            PatchRandomSampleDataModule)
-from src.dino import LDino
+from src.lightning.datamodule import (PatchDataModule, PatchFrom2ImagesDataModule,
+                                      PatchRandomSampleDataModule)
+from src.lightning.dino import LDino
 
 
 def prepare(mode, datamodule_args, experiment_name, trainer_args) -> Tuple[PatchDataModule, pl.Trainer]:
@@ -83,7 +83,7 @@ def get_embeddings(data_module, model, trainer) -> dict:
 
 
 def extract_features(experiment_name: str, mode: str, trainer: DictConfig, model: DictConfig, data_module: DictConfig) -> Tuple[PatchDataModule, LDino, Dict[Phase, list]]:
-    """画像から特徴量を抽出するDINOを訓練します．モデル，特徴量がすでに保存されていた場合は，復元します．
+    """画像から特徴量を抽出するDINOを訓練し、使用したデータモジュール、訓練済みモデル、抽出した特徴量を保存し、返します．モデル，特徴量がすでに保存されていた場合は，訓練を行わず、復元して返します．
 
     Args:
         experiment_name (str): 現在のmlflow experiment_name

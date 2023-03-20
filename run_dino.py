@@ -10,8 +10,8 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import MLFlowLogger
 
 from src.old_classifier import get_classifier
-from src.datamodule import PatchDataModule, PatchFrom2ImagesDataModule, PatchRandomSampleDataModule
-from src.dino import LDino
+from src.lightning.datamodule import PatchDataModule, PatchFrom2ImagesDataModule, PatchRandomSampleDataModule
+from src.lightning.dino import LDino
 from src.preprocess import reduce_dimension
 from src.utils.attention import save_attentions
 from src.utils.embeddings import log_embeddings
