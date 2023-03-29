@@ -1,23 +1,19 @@
 
 
 import math
-from typing import Optional
+from functools import partial
+
 import pytorch_lightning as pl
-import torch
-import torchvision.transforms as transforms
-from torch.optim import Adam, SGD
-from torch.utils.data import DataLoader, Subset
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-# from vit_pytorch import ViT, Dino
-import vit_pytorch.dino as dino
-import torchmetrics
-import torchvision.models as models
 import timm
-from src.utils.attention import AttentionGetter
-from src.utils.data import NikonFileInfoManager, PatchDataset, PatchFrom2ImagesDataset, RandomSamplePatchDataset, SpoiledPatchDataset
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from functools import wraps, partial
+import torchmetrics
+import vit_pytorch.dino as dino
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+from src.utils.attention import AttentionGetter
 
 
 class LDino(pl.LightningModule):
