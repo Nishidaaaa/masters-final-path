@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import mlflow
 import numpy as np
 from omegaconf import DictConfig
+from omegaconf import OmegaConf
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -16,7 +17,19 @@ from src.lightning.datamodule import (PatchDataModule, PatchFrom2ImagesDataModul
 from src.lightning.dino import LDino
 
 
-def prepare(mode, datamodule_args, experiment_name, trainer_args) -> Tuple[PatchDataModule, pl.Trainer]:
+def prepare(mode: str, datamodule_args: DictConfig, experiment_name: str, trainer_args: DictConfig) -> Tuple[PatchDataModule, pl.Trainer]:
+    """使用するDatamoduleとTrainerを生成して返します．
+
+    Args:
+        mode (str): パッチの生成方法．simple:画像をグリッド上切ってそれぞれをパッチに．from2images:simpleと同様だが，訓練時のみ対象学習時に同じラベルの他画像からパッチを2枚とってくる．randomsample:画像をグリッド上ではなく，ランダム座標から切り取る．
+        datamodule_args (DictConfig): `PatchDataModule`のコンストラクタ引数
+        experiment_name (str): 
+        trainer_args (DictConfig): `pl.Trainer`のコンストラクタ引数
+
+    Returns:
+        Tuple[PatchDataModule, pl.Trainer]: _description_
+    """
+
     data_modules = {"simple": PatchDataModule, "from2images": PatchFrom2ImagesDataModule, "randomsample": PatchRandomSampleDataModule}
     data_module = data_modules[mode](datamodule_args)
     data_module.setup()
@@ -32,7 +45,17 @@ def prepare(mode, datamodule_args, experiment_name, trainer_args) -> Tuple[Patch
     return data_module, trainer
 
 
-def train_model(trainer, datamodule, model_args) -> LDino:
+def train_model(trainer: pl.Trainer, datamodule: PatchDataModule, model_args: DictConfig) -> LDino:
+    """DINOを訓練して保存し，返します．すでに保存されていた場合は読み込んで返します．
+
+    Args:
+        trainer (pl.Trainer): _description_
+        datamodule (PatchDataModule): _description_
+        model_args (DictConfig): _description_
+
+    Returns:
+        LDino: _description_
+    """
     try:
         check_point_uri = mlflow.get_artifact_uri("best.ckpt")
         check_point_path = urlparse(check_point_uri).path
@@ -47,7 +70,17 @@ def train_model(trainer, datamodule, model_args) -> LDino:
     return model
 
 
-def get_embeddings(data_module, model, trainer) -> dict:
+def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Trainer) -> dict:
+    """訓練したDINOを用いて，画像の特徴量を抽出して，保存し返します．すでに保存されていた場合は読み込んで返します．
+
+    Args:
+        data_module (PatchDataModule): _description_
+        model (LDino): _description_
+        trainer (pl.Trainer): _description_
+
+    Returns:
+        dict: _description_
+    """
     train = data_module.train_dataloader(shuffle=False, original=True)
     val = data_module.val_dataloader(shuffle=False, original=True)
     test = data_module.test_dataloader(shuffle=False, original=True)
