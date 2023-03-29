@@ -67,7 +67,10 @@ runは固有のrun_idを持ちます．特に指定せずにrun_all.pyを実行�
 
 `python run_all.py extract_features_id=c0c77a62e22e4451990636e554eb5d41 reduce_dimension_id=fc532c1a1fcf46a184fe22e8e497f2d5`
 
+# 入力データ扱いについて
+PyTorchのDatasetクラスをPytorchLightningのDataModuleクラスで包んで扱っています．
+データについてカスタマイズしたい場合はsrc.utils.dataでDatasetを，src.lightning.datamoduleでDataModuleの実装を行ってください．
+また，src.utils.dataにはファイル名を管理しているNikonFileInfoManagerもあります．単に新しくデータが増える場合はこのクラスを変更等してください．
 
-
-
-
+# おわりに
+リファクタリングやコメントの追加が十分にできておらずスミマセン．
