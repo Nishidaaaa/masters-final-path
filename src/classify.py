@@ -1,28 +1,18 @@
 
 
-from src.utils.ml import KmeansCluster, UmapReducer
-import src
-import pandas as pd
-import matplotlib.pyplot as plt
+import itertools
+import json
+from multiprocessing import Pool
+from urllib.parse import urlparse
+
 import mlflow
 import numpy as np
-import sklearn.preprocessing as preprocessing
-from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
-from sklearn.svm import SVC
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from matplotlib.colors import LogNorm
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
-import umap
-import time
-import itertools
 from tqdm import tqdm
-from multiprocessing import Pool
-from concurrent.futures import ProcessPoolExecutor
-from urllib.parse import urlparse
-import json
+
+import src
 
 
 def train_func(x):

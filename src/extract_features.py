@@ -23,7 +23,7 @@ def prepare(mode: str, datamodule_args: DictConfig, experiment_name: str, traine
     Args:
         mode (str): パッチの生成方法．simple:画像をグリッド上切ってそれぞれをパッチに．from2images:simpleと同様だが，訓練時のみ対象学習時に同じラベルの他画像からパッチを2枚とってくる．randomsample:画像をグリッド上ではなく，ランダム座標から切り取る．
         datamodule_args (DictConfig): `PatchDataModule`のコンストラクタ引数
-        experiment_name (str): 
+        experiment_name (str):
         trainer_args (DictConfig): `pl.Trainer`のコンストラクタ引数
 
     Returns:
@@ -70,7 +70,7 @@ def train_model(trainer: pl.Trainer, datamodule: PatchDataModule, model_args: Di
     return model
 
 
-def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Trainer) -> dict:
+def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Trainer) -> Dict[Phase, list]]:
     """訓練したDINOを用いて，画像の特徴量を抽出して，保存し返します．すでに保存されていた場合は読み込んで返します．
 
     Args:
@@ -81,27 +81,27 @@ def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Train
     Returns:
         dict: _description_
     """
-    train = data_module.train_dataloader(shuffle=False, original=True)
-    val = data_module.val_dataloader(shuffle=False, original=True)
-    test = data_module.test_dataloader(shuffle=False, original=True)
+    train= data_module.train_dataloader(shuffle=False, original=True)
+    val= data_module.val_dataloader(shuffle=False, original=True)
+    test= data_module.test_dataloader(shuffle=False, original=True)
 
-    dataloaders = {"val": val, "test": test, "train": train}
-    codes = {}
+    dataloaders= {"val": val, "test": test, "train": train}
+    codes= {}
     for phase, loader in dataloaders.items():
-        embeds_save_path = urlparse(mlflow.get_artifact_uri(f"embeddings/{phase}_data.pickle")).path
-        labels_save_path = urlparse(mlflow.get_artifact_uri(f"embeddings/{phase}_label.pickle")).path
+        embeds_save_path= urlparse(mlflow.get_artifact_uri(f"embeddings/{phase}_data.pickle")).path
+        labels_save_path= urlparse(mlflow.get_artifact_uri(f"embeddings/{phase}_label.pickle")).path
 
         try:
             with open(embeds_save_path, "rb") as f:
-                codes[phase] = pickle.load(f)
+                codes[phase]= pickle.load(f)
         except:
-            embeds, _labels = [], []
+            embeds, _labels= [], []
             model.eval()
             for embed, label in trainer.predict(model, loader):
                 embeds.append(embed.numpy())
                 _labels.append(label.numpy())
-            embeds = np.concatenate(embeds)
-            _labels = np.concatenate(_labels)
+            embeds= np.concatenate(embeds)
+            _labels= np.concatenate(_labels)
 
             with open(f"tmp/{phase}_data.pickle", "wb") as f:
                 pickle.dump(embeds, f, protocol=4)
@@ -110,7 +110,7 @@ def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Train
 
             mlflow.log_artifact(local_path=f"tmp/{phase}_data.pickle", artifact_path=f"embeddings")
             mlflow.log_artifact(local_path=f"tmp/{phase}_label.pickle", artifact_path=f"embeddings")
-            codes[phase] = embeds
+            codes[phase]= embeds
 
     return codes
 
@@ -128,7 +128,7 @@ def extract_features(experiment_name: str, mode: str, trainer: DictConfig, model
     Returns:
         Tuple[PatchDataModule, LDino, Dict[Phase, list]]: PatchDataModule, LDino, 抽出した特徴量のタプルを返す．
     """
-    _data_module, _trainer = prepare(mode=mode, datamodule_args=data_module, experiment_name=experiment_name,  trainer_args=trainer)
-    _model = train_model(trainer=_trainer, datamodule=_data_module, model_args=model)
-    _embeds = get_embeddings(data_module=_data_module, model=_model, trainer=_trainer)
+    _data_module, _trainer= prepare(mode=mode, datamodule_args=data_module, experiment_name=experiment_name,  trainer_args=trainer)
+    _model= train_model(trainer=_trainer, datamodule=_data_module, model_args=model)
+    _embeds= get_embeddings(data_module=_data_module, model=_model, trainer=_trainer)
     return _data_module, _model, _embeds
