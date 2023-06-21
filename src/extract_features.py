@@ -70,7 +70,7 @@ def train_model(trainer: pl.Trainer, datamodule: PatchDataModule, model_args: Di
     return model
 
 
-def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Trainer) -> Dict[Phase, list]]:
+def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Trainer) -> Dict[Phase, list]:
     """訓練したDINOを用いて，画像の特徴量を抽出して，保存し返します．すでに保存されていた場合は読み込んで返します．
 
     Args:
