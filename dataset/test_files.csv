@@ -1,31 +1,5 @@
 ,fullpath,basename,type,class,number,magnification,permaHE,label
-0,./dataset/jpg_raw/nikon/275-325 backup new/306/cell.nr2.306.040x.jpg,cell.nr2.306.040x.jpg,cell,nr2,306,040x,True,True
-1,./dataset/jpg_raw/nikon/275-325 backup new/289/cell.nr1.289.040x.jpg,cell.nr1.289.040x.jpg,cell,nr1,289,040x,False,False
-2,./dataset/jpg_raw/nikon/275-325 backup new/298/cell.nr2.298.040x.jpg,cell.nr2.298.040x.jpg,cell,nr2,298,040x,True,True
-3,./dataset/jpg_raw/nikon/275-325 backup new/310/cell.nr2.310.040x.jpg,cell.nr2.310.040x.jpg,cell,nr2,310,040x,True,True
-4,./dataset/jpg_raw/nikon/326-352 backup new/337/cell.nr2.337.040x.jpg,cell.nr2.337.040x.jpg,cell,nr2,337,040x,False,False
-5,./dataset/jpg_raw/nikon/326-352 backup new/342/cell.nr2.342.040x.jpg,cell.nr2.342.040x.jpg,cell,nr2,342,040x,False,False
-6,./dataset/jpg_raw/nikon/275-325 backup new/301/cell.nr1.301.040x.jpg,cell.nr1.301.040x.jpg,cell,nr1,301,040x,False,False
-7,./dataset/jpg_raw/nikon/275-325 backup new/313/cell.nr1.313.040x.jpg,cell.nr1.313.040x.jpg,cell,nr1,313,040x,False,False
-8,./dataset/jpg_raw/nikon/326-352 backup new/333/cell.nr2.333.040x.jpg,cell.nr2.333.040x.jpg,cell,nr2,333,040x,False,False
-9,./dataset/jpg_raw/nikon/275-325 backup new/288/cell.nr1.288.040x.jpg,cell.nr1.288.040x.jpg,cell,nr1,288,040x,False,False
-10,./dataset/jpg_raw/nikon/326-352 backup new/343/cell.nr1.343.040x.jpg,cell.nr1.343.040x.jpg,cell,nr1,343,040x,True,True
-11,./dataset/jpg_raw/nikon/275-325 backup new/305/cell.nr2.305.040x.jpg,cell.nr2.305.040x.jpg,cell,nr2,305,040x,False,False
-12,./dataset/jpg_raw/nikon/275-325 backup new/308/cell.nr1.308.040x.jpg,cell.nr1.308.040x.jpg,cell,nr1,308,040x,True,True
-13,./dataset/jpg_raw/nikon/326-352 backup new/327/cell.nr1.327.040x.jpg,cell.nr1.327.040x.jpg,cell,nr1,327,040x,False,False
-14,./dataset/jpg_raw/nikon/275-325 backup new/324/cell.nr1.324.040x.jpg,cell.nr1.324.040x.jpg,cell,nr1,324,040x,False,False
-15,./dataset/jpg_raw/nikon/275-325 backup new/311/cell.nr1.311.040x.jpg,cell.nr1.311.040x.jpg,cell,nr1,311,040x,False,False
-16,./dataset/jpg_raw/nikon/275-325 backup new/307/cell.nr2.307.040x.jpg,cell.nr2.307.040x.jpg,cell,nr2,307,040x,True,True
-17,./dataset/jpg_raw/nikon/275-325 backup new/285/cell.nr2.285.040x.jpg,cell.nr2.285.040x.jpg,cell,nr2,285,040x,False,False
-18,./dataset/jpg_raw/nikon/275-325 backup new/317/cell.nr1.317.040x.jpg,cell.nr1.317.040x.jpg,cell,nr1,317,040x,True,True
-19,./dataset/jpg_raw/nikon/275-325 backup new/278/cell.nr2.278.040x.jpg,cell.nr2.278.040x.jpg,cell,nr2,278,040x,False,False
-20,./dataset/jpg_raw/nikon/326-352 backup new/335/cell.nr1.335.040x.jpg,cell.nr1.335.040x.jpg,cell,nr1,335,040x,False,False
-21,./dataset/jpg_raw/nikon/275-325 backup new/308/cell.nr2.308.040x.jpg,cell.nr2.308.040x.jpg,cell,nr2,308,040x,True,True
-22,./dataset/jpg_raw/nikon/275-325 backup new/313/cell.nr2.313.040x.jpg,cell.nr2.313.040x.jpg,cell,nr2,313,040x,False,False
-23,./dataset/jpg_raw/nikon/326-352 backup new/340/cell.nr1.340.040x.jpg,cell.nr1.340.040x.jpg,cell,nr1,340,040x,True,True
-24,./dataset/jpg_raw/nikon/275-325 backup new/277/cell.nr1.277.040x.jpg,cell.nr1.277.040x.jpg,cell,nr1,277,040x,True,True
-25,./dataset/jpg_raw/nikon/326-352 backup new/337/cell.nr1.337.040x.jpg,cell.nr1.337.040x.jpg,cell,nr1,337,040x,False,False
-26,./dataset/jpg_raw/nikon/275-325 backup new/299/cell.nr1.299.040x.jpg,cell.nr1.299.040x.jpg,cell,nr1,299,040x,False,False
-27,./dataset/jpg_raw/nikon/275-325 backup new/307/cell.nr1.307.040x.jpg,cell.nr1.307.040x.jpg,cell,nr1,307,040x,True,True
-28,./dataset/jpg_raw/nikon/275-325 backup new/324/cell.nr2.324.040x.jpg,cell.nr2.324.040x.jpg,cell,nr2,324,040x,False,False
-29,./dataset/jpg_raw/nikon/275-325 backup new/283/cell.nr2.283.040x.jpg,cell.nr2.283.040x.jpg,cell,nr2,283,040x,False,False
+0,./dataset/PathMNIST/pathmnist/test7_0.png,test7_0.png,cell,adipose,7,040x,False  ,False 
+1,./dataset/PathMNIST/pathmnist/test14_0.png,test14_0.png,cell,adipose,14,040x,False ,False 
+2,./dataset/PathMNIST/pathmnist/test37_3.png,test37_3.png,cell,lymphocytes,37,040x,True ,True 
+3,./dataset/PathMNIST/pathmnist/test45_3.png,test45_3.png,cell,lymphocytes,45,040x,True ,True 
