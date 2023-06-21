@@ -9,7 +9,7 @@ from src.reduce_dimension import reduce_dimension
 from src.utils.analyze import log_graphs
 from src.utils.log import IDLogger, recover_and_log_config
 
-experiment_name = "test"
+experiment_name = "pathmnist_test"
 # experiment_name = "run_all"
 
 
