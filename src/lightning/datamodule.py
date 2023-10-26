@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torchvision.transforms as transforms
 import torch
 import src
-from src.utils.data import NikonFileInfoManager, PatchDataset, PatchFrom2ImagesDataset, RandomSamplePatchDataset, ResizedDataset
+from src.utils.data import PathMNISTInfoManager, PatchDataset, PatchFrom2ImagesDataset, RandomSamplePatchDataset, ResizedDataset
 import mlflow
 import os
 from torch.utils.data import DataLoader, Subset
@@ -28,7 +28,7 @@ def split_files(files):
 
     n_train = int(n_files*0.5)
     n_val = int(n_files*0.2)
-    n_test = int(n_files*0.3)
+    n_test = int(n_files*0.3) #あやしい
 
     train_files = files[0:n_train].reset_index()
     val_files = files[n_train:n_train+n_val].reset_index()
@@ -45,7 +45,7 @@ class ResizeDataModule(pl.LightningDataModule):
     def setup(self, stage: str = "") -> None:
         self.augmentation = flip_augmentations
         self.preprocess = totensor_normalize
-        manager = NikonFileInfoManager(**self.hparams.filemanager)
+        manager = PathMNISTInfoManager(**self.hparams.filemanager)
         files = manager.get_files(**self.hparams.file_spoiler)
         files = files.sample(frac=1, random_state=self.hparams.split_random_state, ignore_index=True)
         self.files = split_files(files)
@@ -81,7 +81,7 @@ class PatchDataModule(pl.LightningDataModule):
     def setup(self, stage: str = "") -> None:
         self.augmentation = flip_augmentations
         self.preprocess = totensor_normalize
-        manager = NikonFileInfoManager(**self.hparams.filemanager)
+        manager = PathMNISTInfoManager(**self.hparams.filemanager)
         files = manager.get_files(**self.hparams.file_spoiler)
         files = files.sample(frac=1, random_state=self.hparams.split_random_state, ignore_index=True)
         self.files = split_files(files)

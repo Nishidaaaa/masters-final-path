@@ -13,7 +13,7 @@ def get_reducer(mode, features, reducer):
     _reducer = method.try_load()
     if _reducer is None:
         _reducer = method.from_config(reducer)
-        _reducer.train(features["train"])
+        _reducer.train(features["train"]) ###ここで呼び出し.
     return _reducer
 
 

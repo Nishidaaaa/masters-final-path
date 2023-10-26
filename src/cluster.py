@@ -34,12 +34,13 @@ def sort_cluster(clustered, labels, n_clusters):
             _label = df["label"][df["cluster"] == c]
             n_ng = (_label == 0).sum()
             n_ca = (_label == 1).sum()
+            #n_ca = (_label == 1).sum()
             ca_counts[phase].append(n_ca)
             ng_counts[phase].append(n_ng)
 
     n_ca = np.array(ca_counts["train"])
     n_ng = np.array(ng_counts["train"])
-
+    
     ratio = n_ca/(n_ca+n_ng)
     new_map = np.argsort(ratio)
 

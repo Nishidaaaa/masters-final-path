@@ -40,20 +40,26 @@ data_module:
   num_workers: 4
   split_random_state: 0
   filemanager:
-    root: ./dataset/PathMNIST/pathmnist/
-    index_xlsx: ./dataset/PathMNIST/index.xlsx
+    #root: ./dataset/jpg_raw/nikon/
+    #index_xlsx: ./dataset/jpg_raw/index.xlsx
+    root: ./dataset/CTS_sample_100/
+    index_xlsx: ./dataset/nikon/index.xlsx
     exts:
       - jpg
       - jpeg
-      - png
-      
+    pairs:
+      - name: 'ng'
+        label: 0
+      - name: 'ca'
+        label: 1
+    
   file_spoiler:
-    types: 
-      # - fna_cell
+    types:
       - cell
     classes:
-      - adipose
-      - lymphocytes
-      
+      - ng
+      - ca
+    labels:
+      [0,1]
     magnifications:
-      - 040x
+      - 200x

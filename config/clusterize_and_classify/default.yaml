@@ -2,7 +2,7 @@
 # mode: kmeans_rf
 # classifier:
 kmeans_args:
-  n_clusters: 4
+  n_clusters: 16
   random_state: 0
 # svm:
 #   random_state: 0

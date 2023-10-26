@@ -1,0 +1,83 @@
+mode: randomsample
+
+trainer:
+  max_epochs: 1
+  accelerator: gpu
+  devices: 
+    - 0
+    
+model:
+  image_size: &imagesize 126 #もともと224 　
+
+  lr: 0.001
+  beta1: 0.9
+  beta2: 0.999
+
+  net:
+    model_name: resnet34
+    # model_name: vit_small_patch16_224_dino
+
+    pretrained: True
+    num_classes: -1
+    
+
+  dino:
+    # hidden_layer: norm
+    hidden_layer: fc
+    projection_hidden_size: 128      # projector network hidden dimension
+    student_temp: 0.9                # student temperature
+    num_classes_K: 4096             # output logits dimensions (referenced as K in paper)
+    teacher_temp: 0.04               # teacher temperature, needs to be annealed from 0.04 to 0.07 over 30 epochs
+    local_upper_crop_scale: 0.4      # upper bound for local crop - 0.4 was recommended in the paper
+    global_lower_crop_scale: 0.5     # lower bound for global crop - 0.5 was recommended in the paper
+    moving_average_decay: 0.9        # moving average of encoder - paper showed anywhere from 0.9 to 0.999 was ok
+    center_moving_average_decay: 0.9 # moving average of teacher centers - paper showed anywhere from 0.9 to 0.999 was ok
+    projection_layers: 3             # number of layers in projection network
+
+data_module:
+  image_size: *imagesize
+  batch_size: 128
+  num_workers: 4
+  split_random_state: 0
+  filemanager:
+    root: ./dataset/PathMNIST/sample_x252_1000
+    index_xlsx: ./dataset/index.xlsx
+    exts:
+      - png  
+    pairs: #labelは0から順にふってほしい 
+      - name: 'adipose'
+        label: 0
+      - name: 'background'
+        label: 1
+      - name: 'debris'
+        label: 2
+      - name: 'lymphocytes'
+        label: 3
+      - name: 'mucus'
+        label: 4
+      - name: 'smooth muscle'
+        label: 5
+      - name: 'normal colon mucosa'
+        label: 6
+      - name: 'cancer-associated stroma'
+        label: 7
+      - name: 'colorectal adenocarcinoma epithelium'
+        label: 8
+
+  file_spoiler:
+    types:
+      - cell
+    classes:
+      - adipose
+      - background
+      - debris
+      - lymphocytes
+      - mucus
+      - smooth muscle
+      - normal colon mucosa
+      - cancer-associated stroma
+      - colorectal adenocarcinoma epithelium
+    labels:
+      [0,1,2,3,4,5,6,7,8]
+    magnifications: #使わない
+      - 040x

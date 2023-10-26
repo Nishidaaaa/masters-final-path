@@ -67,14 +67,15 @@ def train_rf_with_grid_search(labels, histgrams,):
     classifier.fit(histgrams["train"], labels["train"])
 
     preds = {phase: classifier.predict(histgrams[phase]) for phase in src.PHASES}
-    probas = {phase: classifier.predict_proba(histgrams[phase])[:, 1] for phase in src.PHASES}
+    probas = {phase: classifier.predict_proba(histgrams[phase]) for phase in src.PHASES}
+    '''#trainの精度が悪い時に結果を全部ひっくり返すという試み
     if accuracy_score(labels["train"], preds["train"]) < 0.5:
         for phase in src.PHASES:
             pred = np.array(preds[phase])
             preds[phase] = (1-pred).tolist()
             proba = np.array(probas[phase])
             probas[phase] = (1-proba).tolist()
-
+    '''
     for phase in src.PHASES:
         acc = accuracy_score(labels[phase], preds[phase])
         print(phase, ":", acc)
@@ -83,4 +84,9 @@ def train_rf_with_grid_search(labels, histgrams,):
     print("importance:", classifier.feature_importances_)
     mlflow.log_text(str(classifier.feature_importances_), "importance.txt")
 
-    return preds
+
+    confs = preds.copy() #データ形式を同じにしたい
+    for phase in src.PHASES:
+        confs[phase] = np.max(probas[phase], axis = 1)
+
+    return preds, probas, confs #各ファイルの予測結果を配列にして返している.

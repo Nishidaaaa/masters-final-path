@@ -9,7 +9,7 @@ from src.reduce_dimension import reduce_dimension
 from src.utils.analyze import log_graphs
 from src.utils.log import IDLogger, recover_and_log_config
 
-experiment_name = "pathmnist_test"
+
 # experiment_name = "run_all"
 
 
@@ -30,6 +30,7 @@ def run_all(config: omegaconf.DictConfig) -> None:
     Args:
         config (omegaconf.DictConfig): 一連の実行に関するコンフィグ. デコレータによって自動で渡されます．
     """
+    experiment_name = config.experiment_name
     experiment = mlflow.set_experiment(experiment_name)
     id_logger = IDLogger()
 
@@ -63,11 +64,13 @@ def run_all(config: omegaconf.DictConfig) -> None:
             次元圧縮に用いたモデルや次元圧縮後のデータは保存されます．
             もしすでに保存されていた場合は読み込みます．
             """
+            #print("hello1")
             id_logger.log("reduce_dimension_id")
+            #print("hello2")
             reduce_dimension_config = recover_and_log_config(config.reduce_dimension)
-
+            #print("hello3")
             reduced_features = reduce_dimension(features=features, **reduce_dimension_config)
-
+            #print("hello4")
             with mlflow.start_run(run_id=config.clusterize_and_classify_id, nested=True):
                 """mlflow3段目
                 2段目で次元圧縮したデータから元画像のラベルを推論するようなモデルを訓練します．
@@ -83,12 +86,15 @@ def run_all(config: omegaconf.DictConfig) -> None:
 
                 clustered_features = clusterize_features(reduced_features, patch_labels, clusterize_and_classify_config.kmeans_args)
                 histgrams = make_hist(clustered_features, cumulative_sums, n_clusters)
-                predictions = train_rf_with_grid_search(original_labels, histgrams)
-
+                predictions, probabilities, confidences = train_rf_with_grid_search(original_labels, histgrams)
+                #print(probabilities)
+                #print(predictions)
+                #print(confidences)
                 log_graphs(histgrams=histgrams, original_labels=original_labels, patch_classes=patch_classes,
                            patch_labels=patch_labels, clustered_features=clustered_features, reduced_features=reduced_features,
                            original_classes=original_classes, n_clusters=n_clusters, original_fullpaths=original_fullpaths,
-                           predictions=predictions, cumulative_sums=cumulative_sums, image_size=extract_features_config.model.image_size)
+                           predictions=predictions, cumulative_sums=cumulative_sums, confidences = confidences, 
+                           image_size=extract_features_config.model.image_size, pairs=extract_features_config.data_module.filemanager.pairs)
 
                 # try:
                 #     save_attentions(model, current_config.classifier.kmeans_args.n_clusters,

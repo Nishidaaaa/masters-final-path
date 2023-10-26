@@ -23,7 +23,10 @@ class PatchDataset(Dataset):
         self.original_dataset = OriginalImageDataset(dataframe, None)
         for path in dataframe["fullpath"]:
             width, height = imagesize.get(path)
+            if (width//patch_size)*(height//patch_size)==0  :
+                raise Exception
             self._n_patches = self._n_patches+(width//patch_size)*(height//patch_size)
+
             self.cumulative_sum.append(self._n_patches)
 
     def _get_original_index(self, index):
@@ -137,7 +140,7 @@ class RandomSamplePatchDataset(Dataset):
 
         mx, my = oi.size
         x = random.randint(0, mx-225)
-        y = random.randint(0, my-255)
+        y = random.randint(0, my-225) 
         patch = oi.crop((x, y, x+224, y+224))
         patch = self.dataset.transforms(patch)
 
@@ -290,7 +293,7 @@ class ThumbnailDataset(Dataset):
     def __len__(self):
         return len(self.fullpaths)
 
-
+'''
 class NikonFileInfoManager:
     def __init__(self, root, index_xlsx, exts=["jpg"]):
         files = self._find_files(root, exts)
@@ -377,3 +380,164 @@ class NikonFileInfoManager:
 
     def get_info(self, name):
         return self.table[self.table["basename"] == name].iloc[0]
+'''
+        
+class PathMNISTInfoManager:
+    def __init__(self, root, index_xlsx, pairs, exts=["jpeg","jpg","png"]):
+        files = self._find_files(root, exts)
+        table = self._table_from_list(files,pairs)
+        #sheet = self._read_xlsx(index_xlsx)
+        #self.table = self._update_table_with_sheet(table, sheet)
+        self.table = table
+
+    def _find_files(self, root, exts):
+        """
+            rootディレクトリ以下のすべてのextファイルのリストを作成.
+            ファイル名が重複するものは片方を削除.
+        """
+        files = []
+        for ext in exts:
+            files.extend(glob.glob(f"{root}**/*.{ext}", recursive=True))
+
+        # 重複削除
+        no_duplicated_files = {}
+        for _file in files:
+            no_duplicated_files[os.path.basename(_file)] = _file
+        no_duplicated_files = list(no_duplicated_files.values())
+        return no_duplicated_files
+
+    def _table_from_list(self, files, pairs):
+        """
+            ファイル名のリストからDataFrameを作成
+        """
+        rows = []
+
+        #ファイル名の形式は (_以外の文字列)_(label).拡張子にする 
+
+        for file in files:
+            base = os.path.basename(file)
+            row = {}
+            row["fullpath"] = file
+            row["basename"] = base
+
+            m = re.match(r'([^_]+)_([0-9]+)', base)
+
+            '''
+            class_coding = {
+                "0":"adipose",
+                "1":"background",
+                "2":"debris",
+                "3":"lymphocytes",
+                "4":"mucus",
+                "5":"smooth muscle",
+                "6":"normal colon mucosa",
+                "7":"cancer-associated stroma",
+                "8":"colorectal adenocarcinoma epithelium",
+            }
+            '''
+            
+            if m is not None :
+                #row["class"] = class_coding[m[2]] 
+                '''
+                if (0 > int(m[3]) and int(m[3]) > 9) :
+                    raise Exception
+                '''
+                label = int(m[2])
+                row["label"] = label  
+                row["class"] = pairs[label]["name"]
+
+            rows.append(row)
+        return pd.DataFrame(rows)
+
+
+    def get_files(self, types, classes, labels, magnifications) -> pd.DataFrame:      
+        _label = self.table["label"].isin(labels)
+        query =  _label 
+        return self.table[query].reset_index(drop=True)
+        
+        '''
+        rows = self.table.to_numpy().tolist()
+        for i in len(rows) 
+            rows["class"] = pairs[str(rows["label"][i])] 
+        '''
+
+    def get_info(self, name):
+        return self.table[self.table["basename"] == name].iloc[0]
+'''
+class PathMNISTInfoManager:
+    def __init__(self, root, index_xlsx, exts=["png"]):
+        files = self._find_files(root, exts)
+        table = self._table_from_list(files)
+        #sheet = self._read_xlsx(index_xlsx)
+        #self.table = self._update_table_with_sheet(table, sheet)
+        self.table = table
+
+    def _find_files(self, root, exts):
+        """
+            rootディレクトリ以下のすべてのextファイルのリストを作成.
+            ファイル名が重複するものは片方を削除.
+        """
+        files = []
+        for ext in exts:
+            files.extend(glob.glob(f"{root}**/*.{ext}", recursive=True))
+
+        # 重複削除
+        no_duplicated_files = {}
+        for _file in files:
+            no_duplicated_files[os.path.basename(_file)] = _file
+        no_duplicated_files = list(no_duplicated_files.values())
+        return no_duplicated_files
+
+    def _table_from_list(self, files):
+        """
+            ファイル名のリストからDataFrameを作成
+        """
+        rows = []
+
+        #fullpath basename class(str) number label(int)
+
+        for file in files:
+            base = os.path.basename(file)
+            row = {}
+            row["fullpath"] = file
+            row["basename"] = base
+
+            m = re.match(r'([a-z]+)([0-9]+)_([0-9]+)', base)
+
+            class_coding = {
+                "0":"adipose",
+                "1":"background",
+                "2":"debris",
+                "3":"lymphocytes",
+                "4":"mucus",
+                "5":"smooth muscle",
+                "6":"normal colon mucosa",
+                "7":"cancer-associated stroma",
+                "8":"colorectal adenocarcinoma epithelium",
+            }
+
+            if m is not None :
+                row["class"] = class_coding[m[3]]
+                
+                row["number"] = m[2]
+
+                if (0 > int(m[3]) and int(m[3]) > 9) :
+                    raise Exception
+                
+                row["label"] = int(m[3])  
+        
+            rows.append(row)
+        return pd.DataFrame(rows)
+
+
+    def get_files(self, types, classes, magnifications, labels=[0,1,2,3,4,5,6,7,8]) -> pd.DataFrame:
+        
+        _class = self.table["class"].isin(classes)     
+        _label = self.table["label"].isin(labels)
+        query =  _class  & _label
+        return self.table[query].reset_index(drop=True)
+
+    def get_info(self, name):
+        return self.table[self.table["basename"] == name].iloc[0]
+
+'''

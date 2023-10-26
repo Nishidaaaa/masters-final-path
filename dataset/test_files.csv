@@ -1,5 +1,0 @@
-,fullpath,basename,type,class,number,magnification,permaHE,label
-0,./dataset/PathMNIST/pathmnist/test7_0.png,test7_0.png,cell,adipose,7,040x,False  ,False 
-1,./dataset/PathMNIST/pathmnist/test14_0.png,test14_0.png,cell,adipose,14,040x,False ,False 
-2,./dataset/PathMNIST/pathmnist/test37_3.png,test37_3.png,cell,lymphocytes,37,040x,True ,True 
-3,./dataset/PathMNIST/pathmnist/test45_3.png,test45_3.png,cell,lymphocytes,45,040x,True ,True 

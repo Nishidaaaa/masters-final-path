@@ -1,8 +1,9 @@
 defaults:
-  - extract_features: default
+  - extract_features: path_default
   - reduce_dimension: default
   - clusterize_and_classify: default
 
+experiment_name: "pathmnist_test" #MLFlowの実験名
 extract_features_id:
 reduce_dimension_id:
 clusterize_and_classify_id:

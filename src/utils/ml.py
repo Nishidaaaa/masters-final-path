@@ -89,7 +89,8 @@ class UmapReducer(MLWithBackup):
         self.should_normalize = should_normalize
 
     def _train(self, train_codes):
-        train_codes = self._normalize(train_codes, self.should_normalize)
+        train_codes = self._normalize(train_codes, self.should_normalize)##このへんかな
+        print('train_codesのサイズは、' + str(len(train_codes)))
         self.umap.fit(train_codes)
 
     def transform(self, codes):

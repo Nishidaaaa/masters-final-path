@@ -60,12 +60,17 @@ def train_model(trainer: pl.Trainer, datamodule: PatchDataModule, model_args: Di
         check_point_uri = mlflow.get_artifact_uri("best.ckpt")
         check_point_path = urlparse(check_point_uri).path
         print(f"trying load {check_point_path}...")
+        #print("finish 1")
         model = LDino.load_from_checkpoint(check_point_path)
-        print(" loaded!")
+        #print("finish 2")
+        #print(" loaded!")
     except:
         model = LDino(model_args)
-        trainer.fit(model, datamodule)
+        #print("finish 3")
+        trainer.fit(model, datamodule) # error部分? 
+        #print("finish 4")
         trainer.test(model, datamodule)
+        #print("finish 5")
 
     return model
 
@@ -100,6 +105,7 @@ def get_embeddings(data_module: PatchDataModule, model: LDino, trainer: pl.Train
             for embed, label in trainer.predict(model, loader):
                 embeds.append(embed.numpy())
                 _labels.append(label.numpy())
+                #_labels.append(np.asarray(label))
             embeds= np.concatenate(embeds)
             _labels= np.concatenate(_labels)
 
